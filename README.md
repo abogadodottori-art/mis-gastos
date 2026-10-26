@@ -1,350 +1,330 @@
-# 💰 Mis Gastos — App Android (Cordova + HTML5)
+# 💰 Mis Gastos
 
-Aplicación móvil **offline** para gestionar gastos mensuales de forma rápida. Diseñada para usar con **una sola mano** en la calle o en la caja del negocio.
+> App Android (offline-first) para registrar gastos mensuales en pesos argentinos. Construida con HTML5 puro y Apache Cordova, sin frameworks, sin backend, sin servidor.
 
-- **Stack:** HTML5 + CSS + JavaScript puro (un solo archivo `www/index.html`)
-- **Empaquetado:** Apache Cordova → APK Android
-- **Persistencia:** `window.localStorage` (no requiere internet ni servidor)
-- **Moneda:** ARS con formato argentino (`$ 12.345,67`)
-- **Diseño:** Dark Mode (`#0F172A` + violeta `#8B5CF6` + amarillo `#FACC15`)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Platform: Android](https://img.shields.io/badge/Platform-Android-green.svg)](https://www.android.com/)
+[![Cordova: 12](https://img.shields.io/badge/Cordova-12-blue.svg)](https://cordova.apache.org/)
+[![Offline First](https://img.shields.io/badge/Offline-First-purple.svg)](#)
 
----
-
-## 📱 Funcionalidades
-
-### Captura de gastos
-- Fecha y hora autocompletadas al abrir la app (editables para registrar gastos pasados)
-- Lugar / comercio (texto libre con autocompletado de lugares ya usados)
-- Categoría (texto libre con sugerencias precargadas: Comida, Bazar, Combustible, Servicios, Varios, etc.)
-- Importe numérico con teclado decimal
-- Botón grande **"Guardar Gasto"** que limpia el formulario y actualiza totales al instante
-
-### Resumen inteligente
-- **Total mensual** destacado en panel superior
-- **Desglose por lugar** con texto normalizado (uppercase + trim + colapsa espacios): `Chino`, `chino ` y `CHINO` se agrupan juntos
-- **Sub-desglose por categoría** expandible cuando un mismo lugar tiene varias categorías (ej. "Chino → Comida / Bazar")
-- Lista ordenada por mayor monto
-
-### Historial y gestión
-- Lista de todos los gastos del mes (los más recientes arriba)
-- **Editar** cualquier gasto (carga los datos en el formulario)
-- **Eliminar** con confirmación
-- **Duplicar** (crea un nuevo gasto con mismo lugar, categoría e importe — útil para gastos recurrentes)
-- **Filtro por mes/año** con selector y flechas ‹ › para navegar meses anteriores
-
-### Extras
-- **Exportar CSV** (descarga `gastos_YYYY-MM.csv` con separador `;` y BOM UTF-8, listo para Excel/Google Sheets)
-- Persistencia garantizada al cerrar o reiniciar la app
-- Refresco automático de la fecha al volver a la app
+Mi primera app móvil. Construida de punta a punta: diseño, código, auditoría (5 rondas con IAs: Gemini, DeepSeek, Z.ai), build y empaquetado APK. Esta es la v1.1.0, lista para usar.
 
 ---
 
-## 📂 Estructura del proyecto
+## 📱 ¿Qué hace?
 
-```
-gastos-app/
-├── config.xml          # Configuración Cordova (paquete, permisos, plugins)
-├── package.json        # Dependencias y scripts npm
-├── README.md           # Esta guía
-├── res/                # (crear) Iconos y splash screens
-│   ├── icon/android/
-│   └── screen/android/
-└── www/                # Código fuente web
-    └── index.html      # App completa (HTML + CSS + JS embebido)
-```
+Una app personal para anotar gastos en pesos argentinos. Sin login, sin nube, sin permisos raros. La abrís, cargás un gasto en 5 segundos, cerrás. Punto.
+
+### Funcionalidades principales
+
+- ✅ **Carga rápida**: fecha/hora autocompletadas, solo escribís lugar, categoría e importe
+- ✅ **Importe con formato AR**: acepta coma decimal (`1500,50`), punto de miles (`1.234,56`) y combinaciones
+- ✅ **Resumen por lugar**: agrupa automáticamente por comercio ("Chino", "YPF", "Farmacia")
+- ✅ **Sub-desglose por categoría**: si un lugar tiene varias categorías, expandible
+- ✅ **Historial mensual** con editar / eliminar / duplicar
+- ✅ **Filtro por mes/año** con flechas ‹ ›
+- ✅ **Exportar CSV** con BOM UTF-8 y separador `;` (abre directo en Excel argentino)
+- ✅ **Persistencia local** con sanitización al cargar (defensa ante JSON corrupto)
+- ✅ **100% offline**: no pide permiso de internet, no envía datos a ningún lado
+- ✅ **Dark mode** con paleta Slate + Violet + Yellow
+- ✅ **Safe-area** para notch y pantallas con cutout
+- ✅ **Hook de back button** (cierra modal / cancela edición antes de salir)
 
 ---
 
-## 🚀 Guía paso a paso para generar el APK
+## 🏗️ Arquitectura
 
-### Requisitos previos
+### Stack técnico
 
-1. **Node.js 18+** — <https://nodejs.org>
-2. **Java JDK 17** — necesario para Android SDK
-   - Verificá: `java -version` (debe decir 17.x)
-3. **Android Studio** — <https://developer.android.com/studio>
-   - Instalá el **SDK de Android 34** (API 34)
-   - Instalá **Android SDK Build-Tools 34.0.0**
-   - Instalá **Android SDK Platform-Tools**
-4. **Apache Cordova CLI**:
-   ```bash
-   npm install -g cordova@12
-   ```
+| Capa | Tecnología | Razón |
+|---|---|---|
+| **UI** | HTML5 + CSS3 (custom properties, grid, flexbox) | Sin frameworks para mantener el bundle liviano (~3 MB APK) |
+| **Lógica** | JavaScript vanilla (ES5-compatible) | Compatible con WebViews antiguos (Android 5.1+) |
+| **Persistencia** | `window.localStorage` | Suficiente para uso personal (~5 MB límite, alcance del proyecto) |
+| **Empaquetado** | Apache Cordova 12 + cordova-android 12 | Wrapper nativo para Android |
+| **Plugins** | cordova-plugin-file, cordova-plugin-file-opener2, cordova-plugin-statusbar | Solo los esenciales |
 
-### Variables de entorno
+### Estructura del proyecto
 
-Configurá en tu `~/.bashrc` o `~/.zshrc` (Linux/macOS) o como Variables de Entorno (Windows):
-
-```bash
-export ANDROID_HOME=$HOME/Android/Sdk
-export ANDROID_SDK_ROOT=$ANDROID_HOME
-export PATH=$PATH:$ANDROID_HOME/platform-tools
-export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
-export JAVA_HOME=/ruta/a/tu/jdk-17
+```
+mis-gastos/
+├── config.xml              # Configuración de Cordova (Android platform, preferencias, plugins)
+├── package.json            # Dependencias y scripts npm
+├── .gitignore              # Excluye node_modules, platforms, plugins, keystore
+├── README.md               # Este archivo
+└── www/                    # Código fuente web (Cordova lo empaqueta en el APK)
+    └── index.html          # App completa: HTML + CSS + JS embebidos en un solo archivo (~1.4K líneas)
 ```
 
-Verificá:
+### Decisiones de diseño clave
+
+- **HTML + CSS + JS en un solo archivo**: al no tener build step, simplifica la cadena de compilación. Para v1.2+ se separará cuando sea necesario por mantenimiento.
+- **IIFE con `'use strict'`**: encapsulación del scope, sin variables globales.
+- **Event delegation en `document.body`**: un único listener para todas las acciones (`data-action="edit"`, `data-action="del"`, etc.), performante y escalable.
+- **`escapeHtml()` para todo input de usuario**: prevención de XSS antes de inyectar en `innerHTML`.
+- **Sanitización de `localStorage` al cargar**: si el JSON está corrupto, filtra gastos inválidos y coacciona `amount` con `Number(g.amount) || 0`.
+- **CSP estricta**: `default-src 'self' 'unsafe-inline' data: blob:;` (unsafe-inline está como deuda para v1.2, cuando separe el JS a archivo externo).
+
+---
+
+## 🚀 Cómo correrlo
+
+### Opción A: Probar la app en el navegador (5 minutos)
+
+No necesitás instalar nada para probar la UI. Abrí `www/index.html` directamente en Chrome.
+
 ```bash
-cordova --version
-adb --version
-java -version
+# Desde la raíz del proyecto
+start www/index.html  # Windows
+xdg-open www/index.html  # Linux
+open www/index.html  # macOS
 ```
 
-### Pasos de compilación
+⚠️ **Limitación**: en navegador, el export CSV usa `<a download>` (no `cordova-plugin-file`). Funciona pero descarga en la carpeta default del navegador, no en `Download/` del celular.
 
-#### 1. Entrá al proyecto
-```bash
-cd gastos-app
-```
+### Opción B: Compilar el APK (requisitos)
 
-#### 2. Instalá dependencias
+#### Requisitos previos
+
+| Software | Versión | Cómo verificar |
+|---|---|---|
+| Node.js | 20 LTS | `node --version` |
+| Java JDK | 17 | `java -version` |
+| Android Studio | última | Con SDK Platform 33 + Build-Tools 33.0.2 |
+| Apache Cordova | 12 | `cordova --version` |
+| Gradle | 8.0+ | `gradle --version` |
+
+#### Pasos de compilación
+
 ```bash
+# 1. Clonar el repo
+git clone https://github.com/abogadodottori-art/mis-gastos.git
+cd mis-gastos
+
+# 2. Instalar dependencias
 npm install
-```
 
-#### 3. Agregá la plataforma Android (solo la primera vez)
-```bash
+# 3. Agregar plataforma Android
 cordova platform add android
-```
 
-#### 4. (Opcional) Probar la app en el navegador
-Como es HTML5 puro, podés abrirla directamente:
-```bash
-# Opción A — Abrir el archivo en el navegador
-open www/index.html          # macOS
-xdg-open www/index.html      # Linux
-start www/index.html         # Windows
+# 4. Verificar requisitos
+cordova requirements
 
-# Opción B — Cordova serve
-cordova serve 8000
-# Luego abrí http://localhost:8000
-```
-
-#### 5. Probar en un dispositivo físico
-- Habilitá la **Depuración USB** en el celular (Ajustes → Opciones de desarrollador)
-- Conectalo por USB
-- Verificá que lo detecte: `adb devices`
-- Ejecutá:
-```bash
-cordova run android
-```
-
-#### 6. Compilar el APK
-
-**APK de debug** (rápido, sin firmar):
-```bash
+# 5. Compilar APK debug
 cordova build android
+
+# 6. Ubicación del APK generado
+# platforms/android/app/build/outputs/apk/debug/app-debug.apk
 ```
-👉 Resultado en: `platforms/android/app/build/outputs/apk/debug/app-debug.apk`
 
-**APK de release** (firmado, listo para distribución):
-```bash
-# 6a. Generar keystore (UNA sola vez)
-keytool -genkey -v -keystore mis-gastos.keystore -alias misgastos \
-  -keyalg RSA -keysize 2048 -validity 10000
+### Opción C: Descargar el APK ya compilado
 
-# 6b. Crear archivo de propiedades (platforms/android/release-signing.properties)
-storeFile=../../mis-gastos.keystore
-storeType=jks
-keyAlias=misgastos
-storePassword=TU_PASSWORD
-keyPassword=TU_PASSWORD
+Cada release en [GitHub Releases](https://github.com/abogadodottori-art/mis-gastos/releases) incluye el APK debug listo para instalar. Solo necesitás habilitar "Instalar apps de origen desconocido" en tu celular.
 
-# 6c. Compilar release
-cordova build android --release
+---
+
+## 📸 Capturas de pantalla
+
+> TODO: Agregar capturas cuando el repo sea público. Sugerido: 3-5 screenshots en device frame mostrando:
+> - Pantalla principal con total del mes
+> - Carga de un gasto nuevo
+> - Resumen agrupado por lugar
+> - Historial con acciones
+> - Export CSV funcionando
+
+---
+
+## 🛡️ Seguridad y privacidad
+
+Esta app **no recopila, no transmite ni almacena datos personales** en servidores externos. Todo queda en tu dispositivo.
+
+- **Sin permisos sensibles**: no pide cámara, ubicación, contactos ni almacenamiento masivo
+- **Sin login / cuentas**: no pedimos email ni contraseña
+- **Sin SDKs de terceros**: no analytics, no AdMob, no Firebase
+- **Sin red**: la app funciona 100% offline (no hay llamadas a servidores)
+- **Export CSV es local**: el archivo se genera en el dispositivo, vos decidís qué hacer con él
+
+### Política de privacidad (resumen)
+
 ```
-👉 Resultado en: `platforms/android/app/build/outputs/apk/release/app-release.apk`
-
-#### 7. Instalar el APK en el celular
-- Copiá el `.apk` al celular (por cable, Google Drive, etc.)
-- Abrí el archivo desde el explorador de archivos del celular
-- Android te pedirá permiso para instalar apps de origen desconocido → aceptá
-
-O por ADB:
-```bash
-adb install -r platforms/android/app/build/outputs/apk/debug/app-debug.apk
+Mis Gastos no recopila, almacena ni transmite datos personales a servidores
+externos. Toda la información se guarda localmente en el dispositivo mediante
+localStorage. No se utilizan analytics, crash reporting ni SDKs de terceros.
+Para borrar todos los datos: desinstalá la app o borrá los datos desde
+Configuración de Android.
 ```
 
 ---
 
-## 🎨 Personalización
+## 🔄 Historial de versiones
 
-### Iconos y splash
-1. Generá tus imágenes (1024×1024 PNG para iconos, 2732×2732 para splash)
-2. Usá `<https://cordova.apache.org/docs/en/latest/cordova-cli/icon-splash.html>` o copiá los archivos en `res/icon/android/` y `res/screen/android/` con los tamaños indicados en `config.xml`
-3. Ejecutá: `cordova prepare android`
+### v1.1.0 (octubre 2026) — Release público inicial
 
-### Cambiar el ID del paquete
-En `config.xml`, modificá:
-```xml
-<widget id="com.tudominio.gastosapp" ...>
-```
-Usá tu propio dominio invertido (ej. `ar.marcos.gastos`).
+Aplicadas 4 rondas de auditoría con IAs (Gemini, DeepSeek, Z.ai) más 1 auditoría de la auditoría. Fixes principales:
 
-### Cambiar colores
-Editá las variables CSS al inicio de `www/index.html`:
-```css
-:root {
-  --bg: #0F172A;        /* Fondo principal */
-  --accent: #8B5CF6;    /* Color de acento */
-  --yellow: #FACC15;    /* Montos destacados */
+- **CSV en APK**: implementado con `cordova-plugin-file` + `cordova-plugin-file-opener2` (fallback a `<a download>` en navegador)
+- **Importe con coma decimal**: `input type="text" inputmode="decimal"` + función `parseAmount()` que acepta `1500,50`, `1.234,56`, etc.
+- **Safe-area para notch**: `env(safe-area-inset-top)` en sticky header
+- **Bug de mes visible**: `resetForm()` ahora sincroniza la fecha con el mes que estás viendo, no siempre con "ahora"
+- **Bloqueo de navegación durante edición**: el dropdown de mes te avisa si estás editando
+- **Sanitización de localStorage**: filtra gastos inválidos al cargar
+- **Event delegation**: reemplazo de `onclick` inline con `data-action` + `closest()`
+- **CSP**: política de seguridad restrictiva
+- **Hook de back button**: cierra modal / cancela edición antes de salir de la app
+
+### Backlog reconocido (v1.2+)
+
+- Backup / restore JSON (importante para app de finanzas)
+- Multi-moneda USD/ARS
+- Presupuestos por categoría
+- Gastos recurrentes
+- Gráfico de torta por categoría
+- Migración a SQLite (cuando los datasets superen los 500 gastos)
+
+---
+
+## 🧪 Testing
+
+No tiene tests automáticos (deuda para v1.2). Para validar manualmente:
+
+```bash
+# Test de smoke (lógica de parseAmount en Node)
+node -e "
+function parseAmount(s) {
+  if (s == null) return NaN;
+  var str = String(s).replace(/[\s\$]/g, '');
+  if (!/^\d[\d.,]*\$/.test(str)) return NaN;
+  if (str.indexOf(',') > -1) {
+    var i = str.lastIndexOf(',');
+    var ent = str.slice(0, i).replace(/[.,]/g, '');
+    var dec = str.slice(i + 1);
+    if (/[.,]/.test(dec)) return NaN;
+    return parseFloat(ent + '.' + (dec || '0'));
+  }
+  if (/^[1-9]\d{0,2}(\.\d{3})+\$/.test(str)) return parseFloat(str.replace(/\./g, ''));
+  if ((str.match(/\./g) || []).length > 1) return NaN;
+  return parseFloat(str);
 }
+
+const tests = [
+  ['1500,50', 1500.5],
+  ['1.234,56', 1234.56],
+  ['1500', 1500],
+  ['1.234', 1234],
+  ['1e5', NaN],
+  ['abc', NaN],
+  ['', NaN],
+  [null, NaN]
+];
+
+tests.forEach(([input, expected]) => {
+  const result = parseAmount(input);
+  const ok = (Number.isNaN(expected) && Number.isNaN(result)) || result === expected;
+  console.log(ok ? '✓' : '✗', JSON.stringify(input), '→', result, ok ? '' : '(esperado: ' + expected + ')');
+});
+"
 ```
 
 ---
 
-## 🔒 Notas técnicas
+## 📚 Lo que aprendí construyendo esto
 
-- **Almacenamiento:** Se usa `window.localStorage` con la clave `gastos_app_v1`. En Android WebView, esto se guarda en el almacenamiento interno de la app y **persiste al cerrar y reiniciar**. Si desinstalás la app o limpiás los datos, se borra.
-- **Exportar CSV:** En Android, el archivo se descarga a la carpeta `Download/` del dispositivo a través del navegador WebView. Si no aparece automáticamente, agregá el plugin `cordova-plugin-file` y `cordova-plugin-file-opener2` (ya incluidos en `config.xml`).
-- **Permisos Android:** La app no requiere permisos especiales (no cámara, no ubicación, no internet). Solo necesita almacenamiento para el CSV, que en Android 11+ se maneja vía scoped storage automáticamente.
-- **Sin internet:** La app funciona 100% offline. El `<access origin="*">` está solo para no bloquear nada, pero no hace llamadas externas.
+Mi primera app móvil. Resumen del proceso:
 
----
+### Lo que no sabía antes y tuve que aprender
 
-## 🐞 Solución de problemas
+1. **Cadena de build Android**: Node.js → JDK → Android Studio → SDK Platform → Build-Tools → Gradle → Cordova → APK
+2. **Diferencia entre Java 8 / 11 / 17 / 21** y por qué `JAVA_HOME` debe apuntar a la versión correcta
+3. **Cordova plugin lifecycle**: cómo los plugins nativos se inyectan en el WebView vía `deviceready`
+4. **Scoped storage Android 11+**: por qué `cordova.file.externalDataDirectory` es la carpeta correcta y no `externalRootDirectory`
+5. **CSP (Content-Security-Policy)**: cómo restringir orígenes en un WebView
+6. **Bug de Cordova 12 con Node 20**: `process.exitCode = err.code` falla cuando `err.code` es string (parcheado a mano)
+7. **Bug de `--` en comentarios XML**: parser XML rechaza `--` dentro de comentarios
+8. **`inputmode="decimal"` en WebView**: el `type="number"` no acepta coma en teclados es-AR
+9. **Event delegation**: mejor patrón que 1000 `onclick` inline
+10. **Backlog engineering**: cuándo aplicar un fix y cuándo dejarlo documentado
 
-| Error | Solución |
-|---|---|
-| `Requirements check failed for JDK` | Instalá JDK 17 y configurá `JAVA_HOME` |
-| `ANDROID_HOME not set` | Instalá Android Studio y exportá `ANDROID_HOME` |
-| `Failed to install apk` | Habilitá Depuración USB en el celular |
-| Gradle build fails | Probá `cordova clean` y luego `cordova build` |
-| `Cannot find module 'q'` | Ejecutá `npm install -g q` o reinstalá cordova |
-| Status bar blanca | Verificá que esté cargado `cordova-plugin-statusbar` |
-| App en blanco | Revisá la consola con `chrome://inspect` mientras está conectada al celular |
+### Lo que mejoraría si arrancara de nuevo
 
----
+- **Separar HTML / CSS / JS en archivos distintos** desde el día 1 (CSP más estricta)
+- **Versionar el schema de datos** (`{v: 2, gastos: [...]}`) desde el primer commit
+- **Implementar backup/restore JSON** antes de cualquier feature nueva
+- **Usar TypeScript** para detectar errores en tiempo de compilación
+- **Implementar tests unitarios** desde el día 1 (mínimo: `parseAmount`, `formatARS`, `normalize`)
 
-## 🔧 Cambios v1.1 — Post-auditoría técnica
+### Proceso iterativo con IAs
 
-Se aplicaron los siguientes fixes identificados en una auditoría con deep-seek:
+La app pasó por **5 rondas de auditoría** con IAs distintas (Gemini, DeepSeek, Z.ai). Cada ronda encontró bugs que la anterior había pasado por alto. El resultado final es más sólido que cualquier primera versión que hubiera publicado solo.
 
-### Críticos (Sprint 0)
-- **`<script src="cordova.js">`** agregado al HTML — sin esto, ningún plugin funciona en el APK
-- **Export CSV reescrito** usando `cordova-plugin-file` + `cordova-plugin-file-opener2` con fallback automático a navegador para test local
-- **Iconos/splash**: se comentaron las referencias a archivos inexistentes para que el build no rompa. Para personalizar, ejecutá `npm run icons` (requiere `cordova-res`)
-- **Campo importe** cambiado de `type="number"` a `type="text" inputmode="decimal"` con función `parseAmount()` que acepta coma o punto (`1500,50`, `1.234,56`, `1500.50` todos válidos)
-
-### Alta prioridad (Sprint 1)
-- **Sticky header** ahora usa `top: var(--safe-top)` para no superponerse al notch
-- **`changeMonth()` unificado**: prevMonth, nextMonth y monthSelect ahora llaman a la misma función, que sincroniza la fecha del form con el mes visible
-- **`formDirty` flag**: `visibilitychange` ya no pisa la fecha manual escrita por el usuario
-- **Listener duplicado de `monthSelect`** eliminado
-- **Event delegation**: los `onclick="window.__*"` inline fueron reemplazados por `data-action` + un único listener en `document.body` (mejor patrón, sin polución del scope global)
-
-### Media prioridad (Sprint 2)
-- **`cordova-plugin-whitelist` y `cordova-plugin-device`** eliminados (no-op en Cordova 10+)
-- **`cordova-plugin-file` bumpado** a `^8.1.0` (compatible con scoped storage Android 11+)
-- **`cordova-plugin-file-opener2` bumpado** a `^4.0.0` (mejor soporte Android 13+)
-- **Preferencias obsoletas eliminadas**: `GradleVersion`, `android-buildToolVersion`, `KeepRunning`, `AndroidInsecureFileModeEnabled`
-- **`main` field** eliminado de `package.json` (Cordova no lo usa, generaba confusión)
-- **CSP meta tag** agregada (offline, sin `unsafe-eval`)
-- **Hook `backbutton`**: cierra modal o cancela edición antes de salir de la app
-
-### Backlog (no aplicado todavía)
-Si en el futuro crece el uso:
-- Paginación del historial (más de 200 gastos por mes)
-- Almacenar importe en centavos (enteros) para evitar floating-point
-- Diffing en `render()` en vez de re-render completo
-- Tests funcionales E2E con Cordova sim
+El detalle completo de cada ronda está en el directorio `docs/auditorias/` (a subir próximamente).
 
 ---
 
-## 🔧 Cambios v1.2 — Ronda 2 post-auditoría
+## 🗺️ Roadmap
 
-Se aplicaron los fixes de una segunda revisión que detectó bugs persistentes y
-deuda técnica confirmada:
+### v1.2 (Q1 2027)
+- [ ] Backup / restore JSON
+- [ ] Touch targets de 44-48px en historial
+- [ ] Onboarding de 1 pantalla
+- [ ] Refactor: separar `index.html` en HTML/CSS/JS
+- [ ] Migración a cordova-android 15 + API 36
 
-### Bug crítico resuelto
-- **`resetForm()` ahora sincroniza con el mes visible** — antes siempre usaba
-  `nowLocalISO()`, lo que causaba que al guardar un gasto de un mes pasado y
-  cargar otro sin tocar la fecha, el segundo cayera en el mes actual en vez del
-  visible. Ahora `resetForm()` decide entre `nowLocalISO()` y
-  `viewYear + '-MM-01T12:00'` según corresponda. El `submit()` fue reordenado
-  para setear `viewYear/viewMonth` antes de llamar `resetForm()`.
+### v1.3 (Q2 2027)
+- [ ] Presupuestos por categoría con barra de progreso
+- [ ] Gráfico de torta (CSS conic-gradient)
+- [ ] Multi-moneda USD/ARS (cotización manual)
+- [ ] Gastos recurrentes
 
-### Consistencia de UX
-- **`monthSelect` ahora bloquea en modo edición** — antes solo los botones ‹ ›
-  bloqueaban; el dropdown dejaba cambiar de mes silenciosamente y causaba
-  comportamiento inconsistente. Ahora muestra el mismo toast
-  `"Cancelá la edición primero"` y re-sincroniza el `<select>` con el mes
-  original.
-
-### Seguridad / build
-- **`<access origin="*">` eliminado** — era contradictorio con el claim de
-  "app 100% offline". Ahora solo se permite `https://localhost` (WebViewAssetLoader)
-  y `file:///*`. Los `<allow-intent>` para `http://*/*` y `https://*/*` también
-  se eliminaron; solo queda `market:*` por si se linkea a la Play Store.
-- **Versión bumpeada a 1.1.0** en `package.json` y `config.xml` (antes 1.0.0
-  aunque el README decía "v1.1").
-
-### Defensa en profundidad
-- **`loadGastos()` sanitiza el JSON** — filtra gastos sin `id`/`datetime`/
-  `place`/`category` y coacciona `amount` con `Number(g.amount) || 0`. Así si
-  alguien edita manualmente el JSON de localStorage y mete un `amount: "abc"`,
-  la app muestra `$0` en vez de `NaN` silencioso.
-- **Código muerto eliminado**: `input[type=number]` CSS (ya no aplica porque el
-  campo es `type=text`) y `navigator.msSaveOrOpenBlob` (IE/Edge legacy).
-- **Script `start`** cambiado de `cordova serve 8000` (deprecado desde CLI 10)
-  a abrir `www/index.html` directo en el navegador.
-- **Doble `buildMonthOptions()`** en el `submit()` eliminado (era redundante).
-
----
-
-## 🔧 Cambios v1.3 — Cierre de auditoría (ronda 3)
-
-El auditor confirmó los 8 fixes de la ronda 2 y señaló 1 issue menor más en
-`dupGasto()`, que ya está aplicado:
-
-- **`dupGasto()` ahora sincroniza la fecha del form** — antes, al duplicar un
-  gasto desde un mes distinto al actual, la vista saltaba al mes actual pero
-  el `datetime` del form seguía en el mes anterior. El próximo gasto cargado
-  sin tocar la fecha caería en el mes equivocado. Ahora se llama
-  `syncFormDateToView()` después de actualizar `viewYear/viewMonth`, con la
-  misma guarda de modo edición que el resto del flujo.
-
-### Backlog reconocido (no aplicado, bajo decisión de diseño)
-
-El auditor también mencionó 4 puntos amarillos que no se aplican por razones
-justificadas:
-
-1. **`loadGastos()` no valida formato de datetime** — un `datetime: "abc"`
-   pasaría el `filter` (truthy) pero `new Date("abc")` es `Invalid Date`, lo
-   que haría el gasto invisible en todas las vistas. No se aplicó porque
-   requiere corrupción externa del JSON (la app nunca guarda eso). Si en el
-   futuro se importa datos desde otra fuente, agregar
-   `!isNaN(new Date(g.datetime).getTime())` al filter.
-
-2. **`<allow-navigation href="blob:*" />` es config muerta** — la exportación
-   CSV escribe a filesystem con `cordova-plugin-file` y abre con
-   `fileOpener2`; el fallback navegador usa `a.download`. Ningún flujo
-   "navega" a un blob URL. Se deja como "por si acaso" — inofensivo.
-
-3. **`parseAmount("1.234")` es ambiguo AR/US** — `parseFloat("1.234")` da
-   `1.234` (punto decimal), no `1234` (separador de miles AR). Decisión de
-   diseño: el placeholder `"0,00"` comunica el formato esperado. Agregar
-   heurística ("si hay un punto y 3 dígitos después, asumir miles") puede
-   confundir más de lo que ayuda. Queda como decisión documentada.
-
-4. **`buildMonthOptions()` usa `value=idx` numérico en vez de `value="YYYY-MM"`**
-   — funciona hoy porque el `change` handler lee `dataset.year/month`, no el
-   `value`. Pero si alguien toca `buildMonthOptions` sin entender el
-   contrato, puede romper. Deuda técnica pendiente para v1.2.
-
-### Estado final
-
-La app está lista para release como **v1.1.0** con 103 tests pasando, sintaxis
-JS válida y todos los bugs críticos resueltos. Los puntos restantes son
-mejoras de robustez para cuando la app crezca, no bloqueantes para uso
-personal.
+### v2.0 (2027-2028, si hay tracción)
+- [ ] Migración a SQLite (cordova-sqlite-storage)
+- [ ] Sync opcional en nube (con backend propio)
+- [ ] Compartir gastos entre usuarios
+- [ ] Versión PWA (Progressive Web App)
+- [ ] Publicación en Play Store (con 12 testers)
 
 ---
 
 ## 📄 Licencia
 
-MIT — Libre uso, modificación y distribución.
+MIT — Libre uso, modificación y distribución. Ver [LICENSE](LICENSE).
 
 ---
 
-**¡Listo!** Cualquier mejora o bug, abrí un issue o mandá PR. 🚀
+## 👤 Autor
+
+**Fabricio Dottori**
+
+- GitHub: [@abogadodottori-art](https://github.com/abogadodottori-art)
+- Email: abogadodottori@gmail.com
+
+---
+
+## 🤝 Contribuir
+
+Este es un proyecto personal de aprendizaje, pero si querés:
+
+- Reportar bugs: abrí un [Issue](https://github.com/abogadodottori-art/mis-gastos/issues)
+- Sugerir features: abrí un Issue con label `enhancement`
+- Mandar PR: hacé fork, creá una rama `feature/tu-cambio`, mandá PR a `main`
+
+**No acepto PRs que agreguen dependencias pesadas** (frameworks, build tools). La filosofía de esta app es mantenerla simple y offline-first.
+
+---
+
+## ⚠️ Disclaimer
+
+Esta app es una herramienta personal de gestión de gastos. **No es un software contable ni financiero certificado**. No soy responsable por pérdida de datos, decisiones financieras tomadas en base a la app, ni problemas derivados de su uso.
+
+Para uso crítico, implementá backups manuales frecuentes (exportá CSV después de cada carga importante).
+
+---
+
+## 🙏 Agradecimientos
+
+- A las IAs que auditaron el código (Gemini, DeepSeek, Z.ai) — cada una encontró bugs que las demás pasaron por alto
+- A la comunidad de Apache Cordova por mantener el framework vivo
+- A mi yo de hace 2 meses, que no se rindió cuando Gradle no encontraba el SDK
+
+---
+
+**Hecho con ☕ y Code en Argentina 🇦🇷**

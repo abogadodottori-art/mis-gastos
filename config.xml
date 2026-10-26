@@ -1,31 +1,67 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
-<widget id="com.tudominio.gastosapp" version="1.1.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.abogadodottori.misgastos" version="1.1.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Mis Gastos</name>
-    <description>App para gestionar gastos mensuales de forma rapida y offline.</description>
-    <author email="dev@tudominio.com" href="https://tudominio.com">Tu Nombre</author>
+    <description>App para gestionar gastos mensuales de forma rápida y offline.</description>
+    <author email="abogadodottori@gmail.com" href="https://github.com/abogadodottori-art">Fabricio Dottori</author>
     <content src="index.html" />
 
+    <!-- App 100% offline: no necesita acceso a internet.
+         En Cordova 12 el WebView usa https://localhost vía WebViewAssetLoader,
+         así que los paths relativos del HTML funcionan sin file:// ni * -->
     <access origin="https://localhost" />
     <access origin="file:///*" />
+    <!-- blob: necesario para que la exportación CSV funcione dentro del WebView -->
     <allow-navigation href="blob:*" />
+    <!-- Solo permitir abrir la Play Store (por si linkeás a la app) -->
     <allow-intent href="market:*" />
 
+    <!-- ===== Plataforma Android ===== -->
     <platform name="android">
         <allow-intent href="market:*" />
+
+        <!-- Iconos: si no tenés archivos PNG en res/icon/android/,
+             Cordova usará el icono por defecto. Para personalizar,
+             generá los PNG con "cordova-res android -skip-config -copy"
+             y descomentá las líneas de abajo. -->
+
+        <!--
+        <icon src="res/icon/android/icon-36-ldpi.png" density="ldpi" />
+        <icon src="res/icon/android/icon-48-mdpi.png" density="mdpi" />
+        <icon src="res/icon/android/icon-72-hdpi.png" density="hdpi" />
+        <icon src="res/icon/android/icon-96-xhdpi.png" density="xhdpi" />
+        <icon src="res/icon/android/icon-144-xxhdpi.png" density="xxhdpi" />
+        <icon src="res/icon/android/icon-192-xxxhdpi.png" density="xxxhdpi" />
+        -->
     </platform>
 
+    <!-- ===== Preferencias (limpias) ===== -->
     <preference name="DisallowOverscroll" value="true" />
+    <!-- AndroidInsecureFileModeEnabled eliminado: Cordova 12 usa https://localhost internamente,
+         no necesitamos file:// inseguro. Si tu build falla por "ERR_FILE_NOT_FOUND", volvé a agregar:
+         <preference name="AndroidInsecureFileModeEnabled" value="true" /> -->
     <preference name="BackgroundColor" value="0xFF0F172A" />
     <preference name="StatusBarOverlaysWebView" value="false" />
     <preference name="StatusBarBackgroundColor" value="#0F172A" />
     <preference name="StatusBarStyle" value="lightcontent" />
     <preference name="Orientation" value="portrait" />
     <preference name="Fullscreen" value="false" />
+    <!-- KeepRunning eliminado: por defecto Cordova pausa el WebView en background,
+         suficiente para una app que solo escribe/lee localStorage. -->
     <preference name="android-minSdkVersion" value="22" />
+    <!-- Bajado a 33 por compatibilidad con cordova-android 12.0.1 (AGP 8.0, Gradle 8.0).
+         cordova-android 12 fue diseñado para SDK 33; SDK 34 requiere AGP 8.1+ que viene
+         con cordova-android 13. Si querés SDK 34, actualizá cordova-android a ^13.0.0
+         Y subí estas dos líneas a 34. -->
     <preference name="android-targetSdkVersion" value="33" />
     <preference name="android-compileSdkVersion" value="33" />
+    <!-- GradleVersion y android-buildToolVersion eliminados:
+         cordova-android 12 trae su propio wrapper Gradle y build-tools correctos.
+         Pinearlos rompe el wrapper. -->
 
+    <!-- Plugins -->
     <plugin name="cordova-plugin-statusbar" spec="^2.4.3" />
     <plugin name="cordova-plugin-file" spec="^8.1.0" />
     <plugin name="cordova-plugin-file-opener2" spec="^4.0.0" />
+    <!-- cordova-plugin-whitelist eliminado: no-op en Cordova 10+.
+         cordova-plugin-device eliminado: no se usa en el código JS. -->
 </widget>
