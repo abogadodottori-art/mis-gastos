@@ -1,0 +1,35 @@
+# Dependencias
+node_modules/
+
+# Cordova (regeneradas con `cordova platform add`)
+platforms/
+plugins/
+
+# Iconos generados por cordova-res
+res/
+
+# Builds
+*.apk
+*.aab
+*.keystore
+*.jks
+release-signing.properties
+
+# Lockfile (mantener en repo para builds reproducibles)
+# package-lock.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# OS
+.tmp/
+tmp/

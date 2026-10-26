@@ -1,0 +1,49 @@
+{
+  "name": "com.tudominio.gastosapp",
+  "displayName": "Mis Gastos",
+  "version": "1.1.0",
+  "description": "App para gestionar gastos mensuales de forma rápida y offline",
+  "scripts": {
+    "start": "npx http-server www -p 8000 -o",
+    "build:android": "cordova build android",
+    "build:android:release": "cordova build android --release",
+    "run:android": "cordova run android",
+    "prepare:android": "cordova platform add android && cordova prepare android",
+    "icons": "cordova-res android --skip-config --copy",
+    "clean": "cordova clean android"
+  },
+  "keywords": [
+    "cordova",
+    "android",
+    "gastos",
+    "finanzas",
+    "offline"
+  ],
+  "author": "Tu Nombre",
+  "license": "MIT",
+  "dependencies": {
+    "cordova-android": "^12.0.1",
+    "cordova-plugin-file": "^8.1.0",
+    "cordova-plugin-file-opener2": "^4.0.0",
+    "cordova-plugin-statusbar": "^2.4.3"
+  },
+  "devDependencies": {
+    "cordova-res": "^0.15.4"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "private": true,
+  "cordova": {
+    "platforms": [
+      "android"
+    ],
+    "plugins": {
+      "cordova-plugin-statusbar": {},
+      "cordova-plugin-file": {
+        "ANDROIDX_WEBKIT_VERSION": "1.4.0"
+      },
+      "cordova-plugin-file-opener2": {}
+    }
+  }
+}
